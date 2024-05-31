@@ -12,7 +12,7 @@ def insert():
 	insertIntoDB(url)
 	return "Success"
 
-@app.route("query", methods=["POST"])
+@app.route("/query", methods=["POST"])
 def query():
 	qry = request.form['query']
 	result = queryDB(qry)
