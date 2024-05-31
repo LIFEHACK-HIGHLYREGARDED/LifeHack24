@@ -61,20 +61,28 @@ def spacy_process(text):
                     print(f"{subject.text} ({subject.label_}) is also known as {obj.text} ({obj.label_})")
 
 def extract_relations(text):
-    # Be sure to start the CoreNLP server with the correct path to the installation
-    with CoreNLPClient(
+    # Initialize the CoreNLP client without automatically starting the server
+    client = CoreNLPClient(
         annotators=['openie'],
         timeout=30000,
         memory='4G',
         endpoint='http://localhost:9001',
         properties='english',
         be_quiet=True,
-        classpath='C:\\NLP\\stanford-corenlp\\*') as client:
-        
+        classpath='C:\\NLP\\stanford-corenlp\\*',
+        start_server=False)  # Do not start the server automatically
+
+    try:
+        client.start()  # Manually start the server
         ann = client.annotate(text)
         for sentence in ann.sentence:
             for triple in sentence.openieTriple:
                 print(f"Subject: {triple.subject}, Relation: {triple.relation}, Object: {triple.object}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        client.stop()  # Manually stop the server
+
 
 
 
