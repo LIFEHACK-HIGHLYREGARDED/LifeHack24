@@ -1,6 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 import spacy
+import stanza
+stanza.install_corenlp(dir='C:\\NLP\\stanford-corenlp')
+from stanza.server import CoreNLPClient
 
 def fetch_article_text(url):
     response = requests.get(url)
@@ -30,12 +33,54 @@ def fetch_article_text(url):
 
 def spacy_process(text):
     nlp = spacy.load('en_core_web_sm')
-    doc = nlp(article_text)
+    doc = nlp(text)
+    print("Entities detected:")
     for ent in doc.ents:
-        print(ent.text, ent.label_)
+        print(f"{ent.text} ({ent.label_})")
+
+    print("\nTokens and Dependencies:")
     for sent in doc.sents:
-        print(sent.text)
+        for token in sent:
+            print(f"{token.text} ({token.dep_} -> {token.head.text})")
+
+    print("\nPossible relationships:")
+    for sent in doc.sents:
+        ent_map = {ent.start: ent for ent in sent.ents}
+        for token in sent:
+            if token.dep_ in ('relcl', 'xcomp', 'ccomp', 'advcl', 'dobj', 'prep', 'pobj') and token.head.i in ent_map:
+                subject = ent_map.get(token.head.i)
+                obj = [ent for ent in sent.ents if ent.start == token.i]
+                if obj:
+                    obj = obj[0]
+                    print(f"{subject.text} ({subject.label_}) {token.head.lemma_} {obj.text} ({obj.label_})")
+            elif token.dep_ == 'appos' and token.head.i in ent_map:
+                subject = ent_map.get(token.head.i)
+                obj = [ent for ent in sent.ents if ent.start == token.i]
+                if obj:
+                    obj = obj[0]
+                    print(f"{subject.text} ({subject.label_}) is also known as {obj.text} ({obj.label_})")
+
+def extract_relations(text):
+    # Be sure to start the CoreNLP server with the correct path to the installation
+    with CoreNLPClient(
+        annotators=['openie'],
+        timeout=30000,
+        memory='4G',
+        endpoint='http://localhost:9001',
+        properties='english',
+        be_quiet=True,
+        classpath='C:\\NLP\\stanford-corenlp\\*') as client:
+        
+        ann = client.annotate(text)
+        for sentence in ann.sentence:
+            for triple in sentence.openieTriple:
+                print(f"Subject: {triple.subject}, Relation: {triple.relation}, Object: {triple.object}")
+
+
 
 url = "https://mothership.sg/2024/05/sq321-fell-54-3m-in-just-4-6-seconds/"
 article_text = fetch_article_text(url)
-spacy_process(article_text)
+text1 = "Microsoft acquires GitHub for $7.5 billion. Tim Cook, CEO of Apple, advocates for privacy."
+spacy_process(text1)
+#extract_relations(article_text)
+extract_relations(text1)

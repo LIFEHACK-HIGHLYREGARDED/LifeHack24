@@ -1,6 +1,7 @@
-from LifeHack24.article_parsing.link_to_text import fetch_article_text
-from LifeHack24.spacy_processing.process_article import spacy_process
-
+#from LifeHack24.article_parsing.link_to_text import fetch_article_text
+#from LifeHack24.spacy_processing.process_article import spacy_process
+from article_parsing.link_to_text import fetch_article_text
+from spacy_processing.process_article import spacy_process
 
 def take_input(text):
     # Assuming links start with http
@@ -10,3 +11,5 @@ def take_input(text):
     else:
         article_text = text
     spacy_process(article_text)
+
+
