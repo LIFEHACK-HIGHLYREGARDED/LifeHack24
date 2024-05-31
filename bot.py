@@ -1,4 +1,3 @@
-from backend import take_input
 from PIL import Image
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, filters, MessageHandler
@@ -7,6 +6,7 @@ from typing import Final
 import docx
 import fitz
 import pytesseract
+import requests
 import validators
 
 TOKEN: Final = '7441258704:AAGD_VLp387mOUExezmhOgbIBuuWyyPX0X0'
@@ -45,7 +45,7 @@ def file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return update.message.reply_text('This file type is not supported. I can only take in DOCX, JPEG and PDF files!')
         
         # HERE, MODEL ACCEPTS AND PROCESSES TEXT
-        take_input(text_content)
+        requests.post('https://lifehack24.onrender.com.insert', data={'text': text_content})
 
         return update.message.reply_text('Thanks for the report! Looking forward to reading it!')
     else: # No documents
@@ -71,7 +71,7 @@ def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # HERE, MODEL ACCEPTS AND PROCESSES TEXT
     for link in validLinks:
-        take_input(link)
+        requests.post('https://lifehack24.onrender.com/insert', data={'url': link})
 
     return update.message.reply_text(f'{reply}')
 
@@ -82,10 +82,10 @@ def query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'To pose queries, type "/query" followed by a space, and then the question.\n\nExample: /query How many terrorism incidents were there in 2010?')
     
     question = arr[1]
-    # here, send question to LLM
-    # then, get answer from LLM
+    # here, send question and get answer from LLM
+    response = requests.post('https://lifehack24.onrender.com/query', data={'query': question})
 
-    return update.message.reply_text(f'Question: {question}\n\nAnswer: [insert answer here]')
+    return update.message.reply_text(f'Question: {question}\n\nAnswer: {response.content.decode()}')
 
 
 # Messages
