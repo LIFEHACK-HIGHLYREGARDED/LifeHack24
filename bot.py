@@ -7,6 +7,7 @@ import validators
 TOKEN: Final = '7441258704:AAGD_VLp387mOUExezmhOgbIBuuWyyPX0X0'
 USERNAME: Final = '@TerrorInsightBot'
 
+
 # Commands
 def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return update.message.reply_text('Hello, I am TerrorInsight, your one stop shop for terrorism information! What would you like me to do today?\n\nType "/help" for the list of commands.')
@@ -18,7 +19,7 @@ def file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.document: # Single document
         new_file = update.message.document.get_file()
 
-        # LLM accepts and processes file
+        # here, LLM accepts and processes file
 
         return update.message.reply_text('Thanks for the report! Looking forward to reading it!')
     else: # No documents
@@ -42,7 +43,7 @@ def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(validLinks) > 0:
         reply += 'Thanks for the links! Looking forward to reading the articles!'
     
-    # LLM goes to link and reads articles
+    # here, LLM goes to link and reads articles
 
     return update.message.reply_text(f'{reply}')
 
@@ -53,8 +54,8 @@ def query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'To pose queries, type "/query" followed by a space, and then the question.\n\nExample: /query How many terrorism incidents were there in 2010?')
     
     question = arr[1]
-    # send question to LLM
-    # get answer from LLM
+    # here, send question to LLM
+    # then, get answer from LLM
 
     return update.message.reply_text(f'Question: {question}\n\nAnswer: [insert answer here]')
 
@@ -71,7 +72,7 @@ def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type
     file = update.message.document.get_file()
 
-    # LLM accepts and processes file
+    # here, LLM accepts and processes file
 
     print(f'User ({update.message.chat.id}) in {message_type} sent a document: {file}')
 
