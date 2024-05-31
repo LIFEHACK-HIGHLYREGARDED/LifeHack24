@@ -5,14 +5,14 @@ from telegram.ext import Application, CommandHandler, ContextTypes, filters, Mes
 import validators
 
 TOKEN: Final = '7441258704:AAGD_VLp387mOUExezmhOgbIBuuWyyPX0X0'
-USERNAME: Final = '@T/errorInsightBot'
+USERNAME: Final = '@TerrorInsightBot'
 
 # Commands
 def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return update.message.reply_text('Hello, I am TerrorInsight, your one stop shop for terrorism information! What would you like me to do today?\n\nType "/help" for the list of commands.')
 
 def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    return update.message.reply_text('Here is the list of commands:\n\n/add_link - submit links to articles for me to process\n/add_file - submit links to articles for me to process\n/query - ask a question, and I will reply you based on information you have given me')
+    return update.message.reply_text('Here is the list of commands:\n\n/add_link - submit links to articles for me to process\n/add_file - submit articles and reports for me to process\n/query - ask a question, and I will reply you based on information you have given me')
         
 def file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.document: # Single document
@@ -56,7 +56,7 @@ def query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # send question to LLM
     # get answer from LLM
 
-    return update.message.reply_text('answer goes here')
+    return update.message.reply_text(f'Question: {question}\n\nAnswer: [insert answer here]')
 
 
 # Messages
@@ -65,7 +65,7 @@ def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text: str = update.message.text # incoming message
     print(f'User ({update.message.chat.id}) in {message_type}: "{text}"')
 
-    return update.message.reply_text('Sorry, I cannot understand that. Type "/help" for the list of commands!')
+    return update.message.reply_text('Sorry, I do not understand that. Type "/help" for the list of commands!')
 
 def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type
