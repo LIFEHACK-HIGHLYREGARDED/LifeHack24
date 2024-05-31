@@ -1,6 +1,6 @@
 def insertIntoDB(url):
-    print("Inserting into DB") ## TO IMPLEMENT
+    print(f"Inserting into DB: {url}") ## TO IMPLEMENT
 
 def queryDB(qry):
-    print("Querying DB") ## TO IMPLEMENT
-    return "Query Result" ## TO IMPLEMENT
+    print(f"Querying DB with qry: '{qry}'") ## TO IMPLEMENT
+    return qry
