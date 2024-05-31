@@ -1,7 +1,12 @@
-from typing import Final
+from backend import take_input
+from PIL import Image
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, filters, MessageHandler
+from typing import Final
 
+import docx
+import fitz
+import pytesseract
 import validators
 
 TOKEN: Final = '7441258704:AAGD_VLp387mOUExezmhOgbIBuuWyyPX0X0'
@@ -16,10 +21,31 @@ def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return update.message.reply_text('Here is the list of commands:\n\n/add_link - submit links to articles for me to process\n/add_file - submit articles and reports for me to process\n/query - ask a question, and I will reply you based on information you have given me')
         
 def file(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.document: # Single document
-        new_file = update.message.document.get_file()
+    if update.message.document:
+        # Download the file
+        file_path = f"./{update.message.document.file_name}"
+        update.message.document.get_file().download(file_path)
 
-        # here, LLM accepts and processes file
+        # Extract text
+        text_content = ""
+        if file_path.endswith('.pdf'):
+            doc = fitz.open(file_path)
+            for page_num in range(len(doc)):
+                page = doc.load_page(page_num)
+                text_content += page.get_text()
+            doc.close()
+        elif file_path.endswith('.jpeg') or file_path.endswith('.jpg'):
+            image = Image.open(file_path)
+            text_content = pytesseract.image_to_string(image)
+        elif file_path.endswith('.docx'):
+            doc = docx.Document(file_path)
+            for paragraph in doc.paragraphs:
+                text_content += paragraph.text + "\n"
+        else:
+            return update.message.reply_text('This file type is not supported. I can only take in DOCX, JPEG and PDF files!')
+        
+        # HERE, MODEL ACCEPTS AND PROCESSES TEXT
+        take_input(text_content)
 
         return update.message.reply_text('Thanks for the report! Looking forward to reading it!')
     else: # No documents
@@ -43,7 +69,9 @@ def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(validLinks) > 0:
         reply += 'Thanks for the links! Looking forward to reading the articles!'
     
-    # here, LLM goes to link and reads articles
+    # HERE, MODEL ACCEPTS AND PROCESSES TEXT
+    for link in validLinks:
+        take_input(link)
 
     return update.message.reply_text(f'{reply}')
 
