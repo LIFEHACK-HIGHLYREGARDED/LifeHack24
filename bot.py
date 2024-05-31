@@ -5,8 +5,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, filters, Mes
 import validators
 
 TOKEN: Final = '7441258704:AAGD_VLp387mOUExezmhOgbIBuuWyyPX0X0'
-USERNAME: Final = '@TerrorInsightBot'
-
+USERNAME: Final = '@T/errorInsightBot'
 
 # Commands
 def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -14,14 +13,17 @@ def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return update.message.reply_text('Here is the list of commands:\n\n/add_link - submit links to articles for me to process\n/add_file - submit links to articles for me to process\n/query - ask a question, and I will reply you based on information you have given me')
-
+        
 def file(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.document:
+    if update.message.document: # Single document
         new_file = update.message.document.get_file()
-        return update.message.reply_text('Thanks for the report! Looking forward to reading it!')
-    else:
-        return update.message.reply_text('File not detected! To add report files, type "/add_file", then attach the report.')
 
+        # LLM accepts and processes file
+
+        return update.message.reply_text('Thanks for the report! Looking forward to reading it!')
+    else: # No documents
+        return update.message.reply_text('File not detected! Attach some documents for me to process! (No need to repeat the "/add_file" keyword!)')
+    
 def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     wordArr = update.message.text.split(' ')
     if not len(wordArr) > 1:
@@ -61,10 +63,19 @@ def query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type
     text: str = update.message.text # incoming message
-
     print(f'User ({update.message.chat.id}) in {message_type}: "{text}"')
 
     return update.message.reply_text('Sorry, I cannot understand that. Type "/help" for the list of commands!')
+
+def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message_type: str = update.message.chat.type
+    file = update.message.document.get_file()
+
+    # LLM accepts and processes file
+
+    print(f'User ({update.message.chat.id}) in {message_type} sent a document: {file}')
+
+    return update.message.reply_text('Thanks for the report! Looking forward to reading them!')
 
 
 # Errors
@@ -87,6 +98,7 @@ if __name__ == '__main__':
     app.add_handler(MessageHandler(filters.TEXT, handle_message))
     app.add_handler(MessageHandler(filters.Document.ALL & filters.Caption('/add_file'), file))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.Document.ALL), handle_message))
+    app.add_handler(MessageHandler(filters.Document.ALL & ~filters.TEXT, handle_document))
 
     # errors
     app.add_error_handler(error)
